@@ -2,7 +2,6 @@
 
 provider "aws" {
 
-	most_recent = true
 	region = "us-east-1"
 
 }
