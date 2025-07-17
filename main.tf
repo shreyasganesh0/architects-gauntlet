@@ -59,4 +59,15 @@ resource "aws_iam_role_policy_attachment" "connect_policy_to_role" {
 	role = aws_iam_role.url_generator_role.name
 	policy_arn = aws_iam_policy.url_generator_policy.arn
 }
-	
+
+resource "aws_cognito_user_pool" "creator_user_pool" {
+
+  name = "creator-platform-user-pool"
+}
+
+resource "aws_cognito_user_pool_client" "client" {
+
+  name = "creator-platform-client"
+
+  user_pool_id = aws_cognito_user_pool.creator_user_pool.id
+}
