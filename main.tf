@@ -28,11 +28,11 @@ resource "aws_iam_role" "url_generator_role" {
 		Version = "2012-10-17",
 		Statement = [
 			{
-				Action = "sts:AssumeRole",
 				Effect = "Allow",
+				Action = "sts:AssumeRole",
 				Principal = { 
-					Service = "lambda:amazonaws.com"
-				}
+					Service = "lambda.amazonaws.com"
+        }
 			}
 		]
 	})
@@ -46,9 +46,9 @@ resource "aws_iam_policy" "url_generator_policy" {
 		Version = "2012-10-17",
 		Statement = [
 			{
-				Action = "s3:PutObject",
 				Effect = "Allow",
-				Resource: "${aws_s3_bucket.uploads.arn}/*"
+				Action = "s3:PutObject",
+				Resource = "${aws_s3_bucket.uploads.arn}/*"
 			}
 		]
 	})
