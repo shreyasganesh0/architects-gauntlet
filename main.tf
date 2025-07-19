@@ -71,3 +71,21 @@ resource "aws_cognito_user_pool_client" "client" {
 
   user_pool_id = aws_cognito_user_pool.creator_user_pool.id
 }
+
+# zip the lambda code
+data "archive_file" "url_generator" {
+
+  type = "zip"
+  source_file = "${path.module}/bootstrap"
+  output_path = "${path.module}/aws/lambda/function.zip"
+}
+
+resource "aws_lambda_function" "url_generator" {
+  filename         = data.archive_file.url_generator.output_path
+  function_name    = "url_generator_function"
+  role             = aws_iam_role.url_generator_role.arn
+  handler          = data.archive_file.url_generator.source_file
+  runtime          = "provided.al2"
+  source_code_hash = data.archive_file.url_generator.output_base64sha256
+}
+

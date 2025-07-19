@@ -19,5 +19,5 @@ run:
 lambda:
 	@echo "Building binary for linux x64 lambda deployment..."
 	@GOOS=linux GOARCH=amd64 go build -o $(LAMBDA_PATH) ./cmd/$(BINARY_NAME)/main.go
-	@zip $(LAMBDA_ZIP_PATH)/hello_world_function.zip $(LAMBDA_PATH)
+	@zip $(LAMBDA_ZIP_PATH)/function.zip $(LAMBDA_PATH)
 	@echo "Zipped function to $(LAMBDA_ZIP_PATH)"
