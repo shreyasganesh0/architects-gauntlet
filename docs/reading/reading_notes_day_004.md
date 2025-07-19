@@ -75,3 +75,64 @@ AWS SDK for go v2 usually used to interface with other AWS resources
   if idle
 - consider seperate versions of functions per user if state is needed to be stored
   to avoid leaks
+
+
+## Terraform Resource aws_lambda_function 
+- Manage AWS lambda function
+- create serveless functions that run code in response to events
+```
+ data "aws_iam_policy_document" "assume_role" {
+     statement {
+         effect = "Allow"
+
+         principals {
+             type = "Service"
+             identifiers = ["lambda:amazonaws.com"]
+         }
+
+         actions = "sts:AssumeRole"
+     }
+} # create json policy
+
+resource "aws_iam_role" "example" {
+    name = "lambda_execution_role"
+    assume_role_policy = data.aws_iam_policy_document.assume_role.json
+} # this is the role
+
+data "archive_file" "example" {
+    type = "zip"
+    source_file = "${path.module}/lambda/index.js"
+    output_path = "${path.module}/lambda/function.zip"
+} # package lambda function into zip
+
+resource "aws_lambda_function" "example" {
+    filename = data.archive_file.example.output_path
+    function_name = "example_lambda_function"
+    role = aws_iam_role.example.arn
+    handler = "index.handler"
+    source_code_hash = data.archive_file.example.output_base64sha256
+
+    runtime = "nodejs20.x"
+
+    enviornment {
+        variable = {
+            ENVIORNMENT = "prod"
+            LOG_LEVEL = "info"
+        }
+    }
+    tags = {
+        Environment = "prod"
+        Application = "example"
+    }
+}
+```
+- this sample file shows that to create a aws lambda using terraform
+    - first create a policy
+    - attach policy to the role
+    - create a aws_lambda_function resource using a archivefile
+        - filename
+        - functionname
+        - role
+        - handler function name = name in file
+        - source_code_hash = hash of the zip files base64sha256
+
