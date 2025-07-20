@@ -54,6 +54,7 @@ resource "aws_iam_policy" "url_generator_policy" {
 	})
 }
 
+
 resource "aws_iam_role_policy_attachment" "connect_policy_to_role" {
 	
 	role = aws_iam_role.url_generator_role.name
@@ -89,3 +90,9 @@ resource "aws_lambda_function" "url_generator" {
   source_code_hash = data.archive_file.url_generator.output_base64sha256
 }
 
+
+resource "aws_iam_role_policy_attachment" "connect_lambda_cloudwatch_policy_to_role" {
+	
+	role = aws_iam_role.url_generator_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
