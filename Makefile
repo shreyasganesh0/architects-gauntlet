@@ -1,6 +1,6 @@
 
 BINARY_NAME=url-generator
-BINARY_PATH=bin/$(BINARY_PATH)
+BINARY_PATH=bin/$(BINARY_NAME)
 LAMBDA_PATH=bootstrap
 LAMBDA_ZIP_PATH=aws/lambda
 
