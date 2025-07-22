@@ -135,7 +135,7 @@ resource "aws_apigatewayv2_route" "get_uploads_urls" {
 
 resource "aws_apigatewayv2_stage" "upload_url" {
 
-  name = "upload_url"
+  name = "$default"
   api_id = aws_apigatewayv2_api.upload_lambda_gw.id
   auto_deploy = true
 }
