@@ -88,6 +88,12 @@ resource "aws_lambda_function" "url_generator" {
   handler          = data.archive_file.url_generator.source_file
   runtime          = "provided.al2"
   source_code_hash = data.archive_file.url_generator.output_base64sha256
+
+  environment {
+    variables = {
+      "UPLOAD_BUCKET" = aws_s3_bucket.uploads.bucket 
+    }
+  }
 }
 
 

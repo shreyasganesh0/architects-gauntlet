@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"log"
 	"time"
@@ -59,7 +60,11 @@ func handlerFunc(ctx context.Context, r events.APIGatewayV2HTTPRequest) (events.
 
 	//Create bucket params and put object
 	s3Key := fmt.Sprintf("uploads/%s/%s", userId, fileName)
-	bucket := "architects-gauntlet-uploads-ckphvyel"
+	bucket := os.Getenv("UPLOAD_BUCKET") 
+	if bucket == "" {
+
+		return err_resp, fmt.Errorf("Failed to get bucket name from env")
+	}
 	//expiry := 15 * time.Minute + time.Now;
 
 	params := &s3.PutObjectInput {
