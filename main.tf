@@ -99,6 +99,50 @@ resource "aws_lambda_function" "url_generator" {
 
 resource "aws_iam_role_policy_attachment" "connect_lambda_cloudwatch_policy_to_role" {
 	
-	role = aws_iam_role.url_generator_role.name
+	role       = aws_iam_role.url_generator_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_apigatewayv2_api" "upload_lambda_gw" {
+
+  name          = "creator_platform_gw"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_integration" "upload_url_lambda" {
+  
+  api_id           = aws_apigatewayv2_api.upload_lambda_gw.id
+  integration_type = "AWS_PROXY"
+
+  integration_uri  = aws_lambda_function.url_generator.invoke_arn
+}
+
+resource "aws_lambda_permission" "upload_url_invoke" {
+
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.url_generator.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.upload_lambda_gw.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_route" "get_uploads_urls" {
+
+  api_id = aws_apigatewayv2_api.upload_lambda_gw.id
+  route_key = "GET /get-upload-url"
+
+  target = "integrations/${aws_apigatewayv2_integration.upload_url_lambda.id}"
+}
+
+resource "aws_apigatewayv2_stage" "upload_url" {
+
+  name = "upload_url"
+  api_id = aws_apigatewayv2_api.upload_lambda_gw.id
+  auto_deploy = true
+}
+
+output "upload_url_api_endpoint" {
+
+  description = "URL of upload gateway endpoint"
+  value       = aws_apigatewayv2_api.upload_lambda_gw.api_endpoint
+
 }
