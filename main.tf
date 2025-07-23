@@ -162,3 +162,13 @@ resource "aws_apigatewayv2_authorizer" "upload_url" {
     issuer = "https://${aws_cognito_user_pool.creator_user_pool.endpoint}"
   }
 }
+
+output "cognito_user_pool_id" {
+  description = "Id of the cognito authorizer pool"
+  value       = aws_cognito_user_pool.creator_user_pool.id
+}
+
+output "cognito_user_pool_client_id" {
+  description = "Id of the cognito authorizer pool client"
+  value       = aws_cognito_user_pool_client.creator_client.id
+}
