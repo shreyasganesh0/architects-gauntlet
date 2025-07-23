@@ -66,7 +66,7 @@ resource "aws_cognito_user_pool" "creator_user_pool" {
   name = "creator-platform-user-pool"
 }
 
-resource "aws_cognito_user_pool_client" "client" {
+resource "aws_cognito_user_pool_client" "creator_client" {
 
   name = "creator-platform-client"
 
@@ -131,6 +131,8 @@ resource "aws_apigatewayv2_route" "get_uploads_urls" {
   route_key = "GET /get-upload-url"
 
   target = "integrations/${aws_apigatewayv2_integration.upload_url_lambda.id}"
+  authorization_type = "JWT"
+  authorizer_id = aws_apigatewayv2_authorizer.upload_url.id
 }
 
 resource "aws_apigatewayv2_stage" "upload_url" {
@@ -145,4 +147,18 @@ output "upload_url_api_endpoint" {
   description = "URL of upload gateway endpoint"
   value       = aws_apigatewayv2_api.upload_lambda_gw.api_endpoint
 
+}
+
+resource "aws_apigatewayv2_authorizer" "upload_url" {
+
+  name             = "upload_url_authorizer"
+  api_id           = aws_apigatewayv2_api.upload_lambda_gw.id
+  authorizer_type  = "JWT"
+  authorizer_uri   = aws_lambda_function.url_generator.invoke_arn
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.creator_client.id] 
+    issuer = "https://${aws_cognito_user_pool.creator_user_pool.endpoint}"
+  }
 }
