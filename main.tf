@@ -68,9 +68,11 @@ resource "aws_cognito_user_pool" "creator_user_pool" {
 
 resource "aws_cognito_user_pool_client" "creator_client" {
 
-  name = "creator-platform-client"
-
-  user_pool_id = aws_cognito_user_pool.creator_user_pool.id
+  name                   = "creator-platform-client"
+  user_pool_id           = aws_cognito_user_pool.creator_user_pool.id
+  access_token_validity  = 5
+  id_token_validity      = 5
+  refresh_token_validity = 10
 }
 
 # zip the lambda code
