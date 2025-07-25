@@ -56,7 +56,7 @@ resource "aws_db_instance" "db_instance" {
 	instance_class = "db.t3.micro"
 	
 	engine = "postgres"
-	engine_version = "17.5"
+	engine_version = "16.9"
 
 	db_subnet_group_name = aws_db_subnet_group.default.name
 
@@ -67,4 +67,52 @@ resource "aws_db_instance" "db_instance" {
 
 	skip_final_snapshot = true
 	publicly_accessible = false
+}
+
+resource "aws_iam_role" "db_proxy" {
+	
+	name = "database-proxy-role"
+	assume_role_policy = jsonencode({
+		Version = "2012-10-17",
+		Statement = [
+			{
+				Effect = "Allow",
+				Action = "sts:AssumeRole",
+				Principal = { 
+					Service = "rds.amazonaws.com"
+				}
+			}
+		]
+	})
+}
+
+resource "aws_iam_role_policy_attachment" "attach_db_proxy_framework_policy" {
+	role       = aws_iam_role.db_proxy.name
+    policy_arn = "arn:aws:iam::aws:policy/aws-service-role/AmazonRDSProxyFrameworkRolePolicy"
+}
+
+resource "aws_db_proxy" "master_db" {
+
+	name = "master-db-proxy"
+	engine_family = "POSTGRESQL"
+	idle_client_timeout = 1800
+	vpc_subnet_ids = data.aws_subnets.def_subnet.ids
+	vpc_security_group_ids = [aws_security_group.database_sg.id]
+	auth {
+		auth_scheme = "SECRETS"
+		description = "Auth for the database secrets"
+		iam_auth = "DISABLED"
+		secret_arn  = aws_secretsmanager_secret.database_master_password.arn
+	}
+	role_arn = aws_iam_role.db_proxy.arn
+}
+
+resource "aws_db_proxy_default_target_group" "master_db"  {
+	db_proxy_name = aws_db_proxy.master_db.name
+}
+
+resource "aws_db_proxy_target" "master_db" {
+	db_instance_identifier = aws_db_instance.db_instance.identifier
+	db_proxy_name = aws_db_proxy.master_db.name
+	target_group_name = aws_db_proxy_default_target_group.master_db.name
 }
