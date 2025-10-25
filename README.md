@@ -74,3 +74,45 @@ aws configure
 terraform init
 terraform apply
 ```
+
+## Features
+
+* **Terraform Configuration:** Defines cloud infrastructure for AWS resources using HCL (HashiCorp Configuration Language).
+* **Go Microservice:** A simple `user-service` written in Go, designed to be deployed onto the provisioned infrastructure.
+* **PostgreSQL Database:** Provisions a managed PostgreSQL database instance via Terraform.
+* **Database Migrations:** Includes SQL migration files (`*.up.sql`) to manage the schema evolution of the `user-service` database.
+* **Makefile Automation:** Uses a `Makefile` to simplify common tasks like running Terraform commands (`init`, `plan`, `apply`) .
+* **Detailed Documentation:** Extensive running notes and reading notes documenting the learning process are available in the `/docs` directory.
+
+## Technical Deep Dive: Defining Infrastructure with Terraform
+
+Terraform allows infrastructure to be defined declaratively. For example, provisioning a managed PostgreSQL database might look like this (conceptual - replace with actual code if available):
+
+```terraform
+# Example from database.tf (Replace with your actual code)
+
+variable "db_password" {
+  description = "Password for the RDS database"
+  type        = string
+  sensitive   = true
+}
+
+resource "aws_db_instance" "user_service_db" {
+  allocated_storage    = 20
+  engine               = "postgres"
+  engine_version       = "14.6"
+  instance_class       = "db.t3.micro"
+  db_name              = "userservicedb"
+  username             = "admin"
+  password             = var.db_password
+  parameter_group_name = "default.postgres14"
+  skip_final_snapshot  = true
+  # ... other configuration like VPC, security groups ...
+}
+
+output "db_endpoint" {
+  description = "The endpoint of the RDS instance"
+  value       = aws_db_instance.user_service_db.endpoint
+}
+```
+This code defines the desired state (a specific type of Postgres instance), and Terraform handles the API calls to the cloud provider to create or update it.
